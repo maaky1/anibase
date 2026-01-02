@@ -6,4 +6,5 @@ export const COLOR = {
   active: "#CDC1FF",
   inactive: "#F5EFFF",
   white: "",
+  black: "#000",
 };
