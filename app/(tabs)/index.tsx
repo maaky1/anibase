@@ -1,33 +1,46 @@
+import AnimeItem from "@/components/AnimeItem";
 import Header from "@/components/Header";
 import { COLOR } from "@/constants/color";
+import { TopAnime } from "@/models/TopAnime";
 import axios from "axios";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
-
-type Anime = {
-  title: string;
-  status: string;
-  synopsis: string;
-};
+import {
+  Dimensions,
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
 const HomeScreen = () => {
-  const [anime, setAnime] = useState<Anime | null>(null);
+  const [heroAnime, setHeroAnime] = useState<TopAnime | null>(null);
+  const [randomAnimes, setRandomAnimes] = useState<TopAnime[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const getAnime = async () => {
-    const topAnime = await axios.get("https://api.jikan.moe/v4/top/anime");
-    const list = topAnime.data.data;
-    const random = list[Math.floor(Math.random() * list.length)];
+  const shuffle = (arr: TopAnime[]) => [...arr].sort(() => 0.5 - Math.random());
 
-    const anime = await axios.get(
-      "https://api.jikan.moe/v4/anime/${random.mal_id}"
-    );
-    // console.log(JSON.stringify(anime.data.data, null, 2));
-    setAnime(anime.data.data);
+  const fetchHome = async () => {
+    setRefreshing(true);
+    try {
+      const res = await axios.get(
+        "https://api.jikan.moe/v4/top/anime?limit=20"
+      );
+
+      const shuffled = shuffle(res.data.data);
+      setHeroAnime(shuffled[0]);
+      setRandomAnimes(shuffled.slice(1, 11));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   useEffect(() => {
-    getAnime();
+    fetchHome();
   }, []);
 
   return (
@@ -36,21 +49,58 @@ const HomeScreen = () => {
       style={{ flex: 1 }}
     >
       <Header />
-      <View style={styles.container}>
-        <View style={styles.card}>
-          <Image
-            source={{
-              uri: "https://cdn.myanimelist.net/images/anime/1015/138006.jpg",
-            }}
-            style={styles.imageFull}
-          />
-          <View style={styles.overlay}>
-            <Text style={styles.title}>{anime?.title}</Text>
-            <Text style={styles.status}>{anime?.status}</Text>
-          </View>
-        </View>
-        <Text style={styles.description}>{anime?.synopsis}</Text>
-      </View>
+
+      <FlatList
+        data={randomAnimes}
+        keyExtractor={(item) => item.mal_id.toString()}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={fetchHome} />
+        }
+        ListHeaderComponent={
+          <>
+            {/* HERO */}
+            {heroAnime && (
+              <View style={styles.heroCard}>
+                <Image
+                  source={{ uri: heroAnime.images.jpg.image_url }}
+                  style={styles.heroImage}
+                />
+                <View style={styles.heroOverlay} />
+                <View style={styles.heroText}>
+                  <Text
+                    style={styles.heroTitle}
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                  >
+                    {heroAnime.title}
+                  </Text>
+                  <Text style={styles.heroStatus}>{heroAnime.status}</Text>
+                </View>
+              </View>
+            )}
+
+            <Text style={styles.sectionTitle}>Random Anime</Text>
+
+            {/* HORIZONTAL LIST */}
+            <FlatList
+              data={randomAnimes}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.mal_id.toString()}
+              contentContainerStyle={{ gap: 10, paddingHorizontal: 10 }}
+              renderItem={({ item }) => (
+                <AnimeItem
+                  mal_id={item.mal_id}
+                  title={item.title}
+                  images={item.images}
+                  status={item.status}
+                />
+              )}
+            />
+          </>
+        }
+        renderItem={null}
+      />
     </LinearGradient>
   );
 };
@@ -58,32 +108,33 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  heroCard: {
+    margin: 12,
+    borderRadius: 20,
+    overflow: "hidden",
+    elevation: 10,
   },
 
-  imageFull: {
+  heroImage: {
     width: "100%",
-    height: 400,
-    borderRadius: 25,
-    elevation: 15,
+    height: 260,
   },
 
-  card: {
-    position: "relative",
-    marginBottom: 20,
-    borderRadius: 12,
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.35)",
   },
 
-  overlay: {
+  heroText: {
     position: "absolute",
-    bottom: 5,
+    bottom: 15,
     left: 15,
   },
 
-  title: {
-    fontSize: 30,
-    fontWeight: "600",
+  heroTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    maxWidth: Dimensions.get("window").width - 40,
     color: COLOR.backgroundLight,
     marginBottom: 8,
     textShadowColor: COLOR.background,
@@ -91,8 +142,8 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
 
-  status: {
-    fontSize: 20,
+  heroStatus: {
+    fontSize: 16,
     color: COLOR.backgroundLight,
     letterSpacing: 1,
     textShadowColor: COLOR.background,
@@ -100,8 +151,14 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
 
-  description: {
-    fontSize: 10,
-    paddingHorizontal: 15,
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    marginVertical: 12,
+    marginLeft: 15,
+    color: COLOR.background,
+    textShadowColor: COLOR.primary,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
 });

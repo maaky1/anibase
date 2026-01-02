@@ -1,5 +1,5 @@
 import { COLOR } from "@/constants/color";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Octicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { FC } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -17,7 +17,10 @@ const Header: FC<Props> = ({ btnBack = false }) => {
           <Ionicons name="arrow-back" color={COLOR.background} size={20} />
         </TouchableOpacity>
       )}
-      <Text style={styles.title}>My App</Text>
+      <Text style={styles.title}>
+        <Octicons name="database" size={20} />
+        Anibase
+      </Text>
     </View>
   );
 };

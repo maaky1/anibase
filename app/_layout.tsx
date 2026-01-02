@@ -7,10 +7,6 @@ export default function RootLayout() {
       <SafeAreaView style={{ flex: 1 }}>
         <Stack
           screenOptions={{
-            // headerTintColor: "blue",
-            // headerStyle: { backgroundColor: "wheat" },
-            // headerTitleStyle: { fontSize: 25 },
-            // headerTitleAlign: "center",
             headerShown: false,
           }}
         >
