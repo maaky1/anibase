@@ -2,10 +2,11 @@
   "expo": {
     "name": "Anibase",
     "slug": "anibase",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "owner": "maaky1",
     "android": {
-      "package": "com.maaky1.anibase"
+      "package": "com.maaky1.anibase",
+      "versionCode": 2
     },
     "extra": {
       "eas": {

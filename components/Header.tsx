@@ -31,14 +31,16 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
+    justifyContent: "center",
     padding: 16,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: COLOR.primary,
-    letterSpacing: 2,
+    fontSize: 23,
+    fontWeight: "700",
+    color: COLOR.background,
+    textShadowColor: COLOR.inactive,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+    letterSpacing: 1,
   },
 });
